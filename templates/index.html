@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Car Price Prediction</title>
+    <link rel="stylesheet" href="static/css/style.css">
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body class="bg-dark">
+    <div class="container">
+        <div class="row">
+            <div class="card mt-5" style="width: 75%; height: 100%; margin: auto;">
+                <div class="card-header">
+                    <div class="col-12">
+                        <center><h1>Welcome to Car Price Prediction </h1></center>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <center>
+                    <form method="post" accept-charset="UTF-8">
+
+                        <div class="col-10 form-group" style="text-align: center;">
+                            <label for=""><b>Select Car Company : </b></label>
+                            <select class="selectpicker form-control" id="company" name="company" required="1" onchange="loadCarModels()">
+                                {% for company in companies %}
+                                <option value="{{company}}">{{ company }}</option>
+                                {% endfor %}
+                            </select>
+                        </div><br>
+
+                        <div class="col-10 form-group" style="text-align:center">
+                            <label for=""><b>Select Car Model : </b></label>
+                            <select class="selectpicker form-control" id="carModel" name="carModel" required="1">
+                            </select>
+                        </div><br>
+
+                        <div class="col-10 form-group" style="text-align: center;">
+                            <label for=""><b>Select Manufacturing Year : </b></label>
+                            <select class="selectpicker form-control" id="year" name="year" required="1">
+                                {% for year in years %}
+                                <option value="{{year}}">{{year}}</option>
+                                {% endfor %}
+                            </select>
+                        </div><br>
+
+                        <div class="col-10 form-group" style="text-align: center;">
+                            <label for=""><b>Select Fuel Type : </b></label>
+                            <select class="selectpicker form-control" id="fuelType" name="fuelType" required="1">
+                                {% for fuel in fuelType %}
+                                <option value="{{fuel}}">{{fuel}}</option>
+                                {% endfor %}
+                            </select>
+                        </div><br>
+
+                        <div class="col-10 form-group" style="text-align: center;">
+                            <label for=""><b>Enter Odometer Reading : </b></label>
+                            <input type="text" class="form-control" placeholder="Enter no. of kms travelled by car" id="odometer" name="odometer" required="1">
+                        </div><br>
+                        <div class="col-10 form-group" style="text-align: center;">
+                            <button class="btn btn-primary form-control" onclick="send_data()">Predict Price</button>
+                        </div><br>
+                    </form>
+                    <br>
+                    </center>
+                    <div class="row">
+                        <div class="col-12" style="text-align: center;">
+                             <h3><span id="prediction"> </span></h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var carModels = {{ car_models | tojson }};
+        function loadCarModels() {
+            var companySelect = document.getElementById('company');
+            var carModelSelect = document.getElementById('carModel');
+            var selectedCompany = companySelect.value;
+            carModelSelect.innerHTML = '<option value="">Select Model</option>';
+            if (carModels[selectedCompany]) {
+                carModels[selectedCompany].forEach(function(model) {
+                    var option = document.createElement('option');
+                    option.value = model;
+                    option.text = model;
+                    carModelSelect.add(option);
+                });
+            }
+        }
+
+        function form_handler() {
+            event.preventDefault();
+        }
+
+        function send_data() {
+            
+            document.querySelector('form').addEventListener('submit', form_handler);
+
+            var fd = new FormData(document.querySelector('form'));
+            var xhr = new XMLHttpRequest();
+
+            xhr.open('POST', '/predict', true);
+            document.getElementById("prediction").innerHTML="Predicting... Please wait";
+
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == XMLHttpRequest.DONE) {
+                    document.getElementById("prediction").innerHTML="Predicted Price : " + xhr.responseText + " INR";
+                }
+            }
+            xhr.onload=function() {}
+            xhr.send(fd); 
+
+        }
+    </script>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>
